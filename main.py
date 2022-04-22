@@ -36,35 +36,48 @@ class ImageViewer(Tk):
         self.title("Image Viewer")
         self.minsize(200, 200)
         self.geometry("900x700+500+150")
+
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+
         self.config(menu=self.menu)
         self.menu_tab_file.add_command(label="Open", underline=0, command=self.open_image)
         self.menu_tab_file.add_separator()
         self.menu_tab_file.add_command(label="Exit", underline=1, command=self.on_exit)
         self.menu.add_cascade(label="File", underline=0, menu=self.menu_tab_file)
 
-        self.field_image.config(width=100, height=100)
+        self.field_image.config(width=200, height=200)
         self.field_button.config(width=100)
         self.button_next.config(text="Next", width=7, command=self.choose_next)
         self.button_prev.config(text="Previous", width=7, command=self.choose_prev)
 
-        self.field_button.pack(side=BOTTOM)
+        # self.field_button.pack(side=BOTTOM)
+        self.field_button.grid(row=1, column=0, sticky=S)
         self.button_next.pack(side=RIGHT, padx=5, pady=1)
         self.button_prev.pack(side=LEFT, padx=5, pady=1)
+        self.field_image.grid(row=0, column=0)
 
 
     def draw_image(self, image):
+        self.field_image.delete("img")
         try:
             self.img = ImageTk.PhotoImage(Image.open(image))
         except Exception:
             pass
-        self.canva_image = self.field_image.create_image(0, 0, anchor='nw', image=self.img)
-        self.field_image.pack(fill=BOTH, expand=1)
+        self.canva_image = self.field_image.create_image(0, 0, anchor=NW, image=self.img)
+        self.field_image.addtag_all("img")
+        self.resize()
+        # self.field_image.pack(fill=BOTH, expand=1)
         self.title(f"Image Viewer | {image}")
+
+    def resize(self):
+        x1, y1, x2, y2 = self.field_image.bbox("img")
+        self.field_image.config(width=x2, height=y2)
 
     def open_image(self):
         filepath = askopenfilename(
             filetypes=[("All files", "*"), ("Png files", "*.png"), ("Jpg files", "*.jpg"), ("Jpeg files", "*.jpeg"),
-                       ("GIF files", "*.gif")])
+                       ("GIF files", "*.gif"), ("BMP files", "*.bmp")])
         if not filepath:
             return
 
