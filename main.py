@@ -8,7 +8,7 @@ image_types = [".png", ".jpg", ".jpeg", ".gif", ".bmp"]
 
 
 class ImageViewer(Tk):
-    def __init__(self, image="tst.png"):
+    def __init__(self, image):
         super().__init__()
         self.canva_image = None
         self.img = None
@@ -61,18 +61,31 @@ class ImageViewer(Tk):
     def draw_image(self, image):
         self.field_image.delete("img")
         try:
-            self.img = ImageTk.PhotoImage(Image.open(image))
+            self.img = Image.open(image)
+            width, height = self.img.size
+            if width > 1500:
+                width = 1300
+            if height > 1000:
+                height = 750
+
+            self.img_tk = ImageTk.PhotoImage(self.img.resize((width, height), resample=1))
+            self.field_image.create_image(0, 0, anchor=NW, image=self.img_tk)
         except Exception:
             pass
-        self.canva_image = self.field_image.create_image(0, 0, anchor=NW, image=self.img)
+        # self.canva_image = self.field_image.create_image(0, 0, anchor=NW, image=self.img)
+
         self.field_image.addtag_all("img")
-        self.resize()
+        self.resize_canva()
         # self.field_image.pack(fill=BOTH, expand=1)
         self.title(f"Image Viewer | {image}")
 
-    def resize(self):
-        x1, y1, x2, y2 = self.field_image.bbox("img")
-        self.field_image.config(width=x2, height=y2)
+    def resize_canva(self):
+        try:
+            x1, y1, x2, y2 = self.field_image.bbox("img")
+            self.field_image.configure(width=x2, height=y2)
+        except TypeError:
+            pass
+
 
     def open_image(self):
         filepath = askopenfilename(
@@ -128,7 +141,7 @@ def main():
     if len(argv) > 1:
         img_name = argv[1]
     # app = ImageViewer(img_name)
-    app = ImageViewer("tst.jpg")
+    app = ImageViewer(img_name)
 
 
 if __name__ == '__main__':
